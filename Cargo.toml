@@ -1,0 +1,28 @@
+[package]
+name = "zkcreds-benchmark"
+version = "0.1.0"
+
+[dependencies]
+ark-crypto-primitives = { version = "0.4.0"}
+ark-bls12-381 = "0.4.0"
+lazy_static = "1.4"
+rand = "0.8"
+rand_core = "0.6"
+rand_chacha = "0.3.1"
+ark-ec = { version = "^0.4.0", default-features = false }
+ark-ff = { version = "^0.4.0", default-features = false }
+ark-poly = { version = "^0.4.0", default-features = false }
+ark-serialize = { version = "^0.4.0", default-features = false, features = [ "derive" ] }
+ark-std = { version = "^0.4.0", default-features = false }
+displaydoc = { version = "0.2.3", default-features = false }
+rayon = { version = "1.5.2", default-features = false, optional = true }
+hashbrown = "0.14.3"
+num-bigint = { version = "0.4", default-features = false }
+
+
+# espresso jellyfish
+jf-commitment = {git = "https://github.com/EspressoSystems/jellyfish",package = "jf-commitment" }
+jf-merkle-tree = {git = "https://github.com/EspressoSystems/jellyfish", package = "jf-merkle-tree"}
+jf-crhf = {git = "https://github.com/EspressoSystems/jellyfish", package = "jf-crhf"}
+jf-relation = {git = "https://github.com/EspressoSystems/jellyfish", package = "jf-relation"}
+jf-plonk = {git = "https://github.com/EspressoSystems/jellyfish", package = "jf-plonk"}
