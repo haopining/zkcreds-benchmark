@@ -22,7 +22,11 @@ num-bigint = { version = "0.4", default-features = false }
 
 # espresso jellyfish
 jf-commitment = {git = "https://github.com/EspressoSystems/jellyfish",package = "jf-commitment" }
-jf-merkle-tree = {git = "https://github.com/EspressoSystems/jellyfish", package = "jf-merkle-tree"}
+jf-merkle-tree = {git = "https://github.com/EspressoSystems/jellyfish", package = "jf-merkle-tree", features = ["gadgets"]}
 jf-crhf = {git = "https://github.com/EspressoSystems/jellyfish", package = "jf-crhf"}
 jf-relation = {git = "https://github.com/EspressoSystems/jellyfish", package = "jf-relation"}
 jf-plonk = {git = "https://github.com/EspressoSystems/jellyfish", package = "jf-plonk"}
+jf-rescue = {git = "https://github.com/EspressoSystems/jellyfish", package = "jf-rescue"}
+
+[features]
+

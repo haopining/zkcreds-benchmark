@@ -1131,6 +1131,7 @@ dependencies = [
  "jf-merkle-tree",
  "jf-plonk",
  "jf-relation",
+ "jf-rescue",
  "lazy_static",
  "num-bigint",
  "rand",

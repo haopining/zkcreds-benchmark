@@ -10,6 +10,7 @@ extern crate jf_merkle_tree;
 extern crate jf_plonk;
 extern crate jf_relation;
 extern crate jf_crhf;
+extern crate jf_rescue;
 extern crate rand;
 extern crate core;
 extern crate ark_ff;
