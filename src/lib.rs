@@ -3,6 +3,7 @@ pub mod proving_system;
 pub mod poseidon_utils;
 pub mod com_tree;
 pub mod proof_data_structure;
+pub mod forest_gadget;
 pub mod tree_circuit;
 
 extern crate jf_commitment;
@@ -14,6 +15,7 @@ extern crate jf_rescue;
 extern crate rand;
 extern crate core;
 extern crate ark_ff;
+extern crate ark_std;
 extern crate rand_chacha;
 extern crate ark_bls12_381;
 extern crate hashbrown;

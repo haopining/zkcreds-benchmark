@@ -56,24 +56,25 @@ pub fn tree_membership_proof_circuit_test<F: RescueParameter>() -> Result<(), Bo
     assert!(circuit.check_circuit_satisfiability(&[]).is_ok());
 
     // Create membership proof
+    let mut circuit1 = PlonkCircuit::<F>::new_turbo_plonk();
     let member_uid = BigUint::from(1u64);
-    let (retreieved_elem, membership_proof) = mt.lookup(&member_uid).expect_ok().unwrap();
+    let (_retreieved_elem, membership_proof) = mt.lookup(&member_uid).expect_ok().unwrap();
 
     //Circuit computation with SparseMerkleTree membership proof
-    let elem_idx_var = circuit.create_variable(member_uid.into()).unwrap();
+    let elem_idx_var = circuit1.create_variable(member_uid.into()).unwrap();
     let membership_proof_var = MerkleTreeGadget::<SparseMerkleTree<F>>::create_membership_proof_variable(
-        &mut circuit,
+        &mut circuit1,
         &membership_proof,
     ).unwrap();
     
     MerkleTreeGadget::<SparseMerkleTree<F>>::enforce_membership_proof(
-        &mut circuit,
+        &mut circuit1,
         elem_idx_var,
         membership_proof_var,
         root_var,
     ).unwrap();
 
-    assert!(circuit.check_circuit_satisfiability(&[]).is_ok());
+    assert!(circuit1.check_circuit_satisfiability(&[]).is_ok());
 
     Ok(())
 }
