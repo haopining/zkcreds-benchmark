@@ -10,8 +10,6 @@ use num_bigint::{BigUint, ToBigUint};
 
 /// Represents the roots of the Merkle trees in the forest
 pub struct MerkleForestRoots<T>
-where
-    T: NodeValue,
 {
     // Roots of the Merkle trees in the forest
     pub trees_roots: Vec<T>,
@@ -25,6 +23,21 @@ where
     _marker: PhantomData<F>,
 }
 
+// impl<F> MerkleForest<F>
+// where
+//     F: RescueParameter
+// {
+//     pub fn roots<T>(&self) -> MerkleForestRoots<T> {
+//         let mut trees_roots = Vec::new();
+//         for tree in &self.trees {
+//             trees_roots.push(tree.commitment().digest());
+//         }
+//         MerkleForestRoots {
+//             trees_roots,
+//         }
+//     }
+// }
+
 // implement Clone for MerkleForestRoots<T: NodeValue>
 impl<T: NodeValue> Clone for MerkleForestRoots<T> {
     fn clone(&self) -> Self {
@@ -34,23 +47,28 @@ impl<T: NodeValue> Clone for MerkleForestRoots<T> {
     }
 }
 
-/////// Here to start
-type SparseMerkleTree<F> = RescueSparseMerkleTree<BigUint, F>;
 
 
-impl<F> MerkleForest<F>
-where
-    F: RescueParameter
-{
-    pub fn roots(&self) -> MerkleForestRoots<F> {
-        let mut trees_roots = Vec::new();
-        for tree in &self.trees {
-            trees_roots.push(tree.commitment().digest());
-        }
-        MerkleForestRoots {
-            trees_roots,
+impl<T> MerkleForestRoots<T> {
+    /// Create a new instance of MerkleForestRoots
+    pub fn new(num_trees: usize) -> Self {
+        Self {
+            trees_roots: Vec::with_capacity(num_trees),
         }
     }
+
 }
 
-// pub trait MerkleForestGadget
+
+
+
+// implement MerkleForestGadget
+// impl <T> MerkleForestGadget<T> for PlonkCircuit<T::NodeValue> {
+
+// }
+
+#[cfg(test)]
+mod merkle_forest_tests {
+
+}
+
