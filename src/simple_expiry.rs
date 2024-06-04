@@ -1,130 +1,75 @@
-#[cfg(test)]
-mod tests {
-use core::hash;
-use ark_bls12_381::Fr;
 use criterion::Criterion;
 use jf_merkle_tree::{
-    gadgets::{Merkle3AryMembershipProofVar, MerkleTreeGadget}, 
-    prelude::{MerkleCommitment, MerkleTreeScheme, RescueSparseMerkleTree,MerkleProof, UniversalMerkleTreeScheme}};
-// use jf_merkle_tree::gadgets::{MerkleTreeGadget, UniversalMerkleTreeGadget};
-// use jf_plonk::{
-//     errors::PlonkError,
-//     proof_system::{PlonkKzgSnark, UniversalSNARK},
-//     transcript::StandardTranscript,
-// };
+    gadgets::MerkleTreeGadget, 
+    prelude::{MerkleCommitment, MerkleTreeScheme, RescueMerkleTree}
+};
 use jf_relation::{Arithmetization, Circuit, PlonkCircuit, Variable};
 use jf_rescue::RescueParameter;
-use hashbrown::HashMap;
-use num_bigint::BigUint;
-use crate::forest_gadget::{MerkleForest, MerkleForestRoots};
-
-const LOG2_NUM_LEAVES: u32 = 31;
-const LOG2_NUM_TREES: u32 = 8;
-const TREE_HEIGHT: u32 = LOG2_NUM_LEAVES + 1 - LOG2_NUM_TREES; // 24
-const NUM_TREES: usize = 2usize.pow(LOG2_NUM_TREES); // 2^8 = 256
-const TREE_HEIGHT_USIZE: usize = 24;
-
-// use crate universal_merkletree_extension::UniversalMerkleTreeMembershipVerify;
+use jf_plonk::{
+    errors::PlonkError,
+    proof_system::{PlonkKzgSnark, UniversalSNARK},
+    transcript::StandardTranscript,
+};
+use jf_utils::test_rng;
+use ark_bls12_377::{Bls12_377, Fr};
 
 
-pub fn test<F: RescueParameter>() {
 
-    let elem = F::from(310u64);
-    
-    // // Create a sparse Merkle tree with height ˋTREE_HEIGHT_USIZEˋ
-    let mut hashmap = HashMap::new();
-        hashmap.insert(BigUint::from(1u64), F::from(2u64));
-        hashmap.insert(BigUint::from(2u64), F::from(2u64));
-        hashmap.insert(BigUint::from(1u64), F::from(3u64));
-    
-    let mt = RescueSparseMerkleTree::<BigUint, F>::from_kv_set(TREE_HEIGHT_USIZE, &hashmap).unwrap();
-    assert_eq!(mt.num_leaves(), hashmap.len() as u64);
+pub fn tree(){
+let mut circuit = PlonkCircuit::<Fr>::new_turbo_plonk();
+// Create a 3-ary MT, instantiated with a Rescue-based hash, of height 1.
+let elements = vec![Fr::from(1_u64), Fr::from(2_u64), Fr::from(100_u64)];
+let mt = RescueMerkleTree::<Fr>::from_elems(Some(10), elements).unwrap();
+let expected_root = mt.commitment().digest();
+ // Get a proof for the element in position 2
+let (_, proof) = mt.lookup(2).expect_ok().unwrap();
 
-    let mut proof = mt.lookup(BigUint::from(1u64)).expect_ok().unwrap();
+ // Circuit computation with a MT
+let elem_idx = circuit.create_variable(2_u64.into()).unwrap();
+let proof_var =
+     MerkleTreeGadget::<RescueMerkleTree<Fr>>::create_membership_proof_variable(
+         &mut circuit,
+         &proof
+     )
+     .unwrap();
+let root_var =
+    MerkleTreeGadget::<RescueMerkleTree<Fr>>::create_root_variable(
+        &mut circuit,
+         expected_root
+     )
+     .unwrap();
+MerkleTreeGadget::<RescueMerkleTree<Fr>>::enforce_membership_proof(
+     &mut circuit,
+     elem_idx,
+     proof_var,
+     root_var
+ )
+ .unwrap();
+ assert!(circuit.check_circuit_satisfiability(&[]).is_ok());
+    circuit.finalize_for_arithmetization().unwrap();
 
-    // let mut proof = mt
-    //     .universal_lookup(BigUint::from(1u64))
-    //     .expect_ok()
-    //     .unwrap()
-    //     .1;
-    
-    let root = mt.commitment().digest();
-    let pos_u64: u64 = 1;
-    
-    // TRACE 不到！！！！！！！！！！
-    let verify_result = mt.verify(&root, &pos_u64, &proof);
+    // // gen_test_mt_gadget_circuit::<Bls12_381, Fq, _>(); // dont know why this is failing
+    let rng = &mut jf_utils::test_rng();
 
-    // //Auth Path
-    // let auth_path = mt.lookup(&uid).expect_ok().unwrap().1;
+    let max_degree = circuit.srs_size().unwrap() + 2;
 
-    let mut merkle_tree_circuit = PlonkCircuit::<F>::new_turbo_plonk();
-    let elem_idx_var: Variable = merkle_tree_circuit.create_variable(F::from(2u64).into()).unwrap();
-    
-    let proof_var = 
-    MerkleTreeGadget::<SparseMerkleTree<F>>::create_membership_proof_variable(
-        &mut merkle_tree_circuit,
+    let srs = PlonkKzgSnark::<Bls12_377>::universal_setup_for_testing(max_degree, rng).unwrap();
+    // // why the circuit above is `PlonkCircuir<ark_ff::Fp<MontBackend<ark_bn254::FqConfi, 4>, 4>>`
+    // // don't know why it found the "FrConfig"
+    let (pk ,vk) = PlonkKzgSnark::<Bls12_377>::preprocess(&srs, &circuit).unwrap();  
+    let proof = PlonkKzgSnark::<Bls12_377>::prove::<_, _, StandardTranscript>(
+        rng,
+        &circuit,
+        &pk,
+        None,
+    ).unwrap();
+    let public_inputs = circuit.public_input().unwrap();
+
+    assert!(PlonkKzgSnark::<Bls12_377>::verify::<StandardTranscript>(
+        &vk,
+        &public_inputs,
         &proof,
-    ).unwrap();
+        None,
+    ).is_ok());
 
-    let root_var = MerkleTreeGadget::<SparseMerkleTree<F>>::create_root_variable(
-        &mut merkle_tree_circuit,
-        expected_root,
-    ).unwrap();
-
-    // Bench proving tree   
-    // TODO: Add benching for proving tree
-
-    // create tree circuit
-    MerkleTreeGadget::<SparseMerkleTree<F>>::enforce_membership_proof(
-        &mut merkle_tree_circuit,
-        elem_idx_var,
-        proof_var,
-        root_var,
-    ).unwrap(); 
- 
-
-    assert!(merkle_tree_circuit.check_circuit_satisfiability(&[]).is_ok());
-    
-    // match merkle_tree_circuit.check_circuit_satisfiability(&[]) {
-    //     Ok(_) => println!("Circuit is satisfiable."),
-    //     Err(e) => println!("Circuit error: {:?}", e),
-    // }
-    
-    // create forest circuit
-    // Create a forest of 256 trees
-    // let mut forest = MerkleForest::<F> {
-    //     trees: vec![mt; NUM_TREES],
-    //     _marker: core::marker::PhantomData::<F>,
-    // };
-
-    // create expiry circuit
-
-    // aggregate circuit
-
-    // Generate proof and Bench circuit
-    // setup
-    // preprocess
-    // prove
-    // verify
-
-
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-//     use num_bigint::BigUint;
-//     use criterion::Criterion;
-//     use std::collections::HashMap;
-//     use ark_bls12_381::Fr;
-//     #[test]
-//     fn test_bench_expiry() {
-//         let mut criterion = Criterion::default();
-//         bench_expiry::<Fr>(&mut criterion);
-//     }
-
-//}
-}
-
-#[test] fn main() {
-    test::<Fr>();
-}
 }

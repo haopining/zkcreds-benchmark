@@ -1,0 +1,1 @@
+MerkleTree<ark_ff::Fp<MontBackend<FqConfig, 6>, 6>, RescueHash<ark_ff::Fp<MontBackend<FqConfig, 6>, 6>>, u64, 3, ark_ff::Fp<MontBackend<FqConfig, 6>, 6>>

@@ -635,9 +635,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "jf-commitment"
+version = "0.1.0"
+source = "git+https://github.com/haopining/jellyfish#06b073a425de402c0dbc5b28cde62bcf9c45abda"
+dependencies = [
+ "ark-std",
+]
+
+[[package]]
 name = "jf-crhf"
 version = "0.1.0"
 source = "git+https://github.com/EspressoSystems/jellyfish#1bce638edb8e881dc3c6fcb9d2d762004b4365cc"
+dependencies = [
+ "ark-serialize",
+ "ark-std",
+]
+
+[[package]]
+name = "jf-crhf"
+version = "0.1.0"
+source = "git+https://github.com/haopining/jellyfish#06b073a425de402c0dbc5b28cde62bcf9c45abda"
 dependencies = [
  "ark-serialize",
  "ark-std",
@@ -660,9 +677,36 @@ dependencies = [
  "displaydoc",
  "hashbrown 0.14.5",
  "itertools 0.12.1",
- "jf-relation",
- "jf-rescue",
- "jf-utils",
+ "jf-relation 0.4.4 (git+https://github.com/EspressoSystems/jellyfish)",
+ "jf-rescue 0.1.0 (git+https://github.com/EspressoSystems/jellyfish)",
+ "jf-utils 0.4.4 (git+https://github.com/EspressoSystems/jellyfish)",
+ "num-bigint",
+ "num-traits",
+ "serde",
+ "sha3",
+ "tagged-base64",
+]
+
+[[package]]
+name = "jf-merkle-tree"
+version = "0.1.0"
+source = "git+https://github.com/haopining/jellyfish#06b073a425de402c0dbc5b28cde62bcf9c45abda"
+dependencies = [
+ "ark-bls12-377",
+ "ark-bls12-381",
+ "ark-bn254",
+ "ark-ec",
+ "ark-ff",
+ "ark-serialize",
+ "ark-std",
+ "derivative",
+ "digest",
+ "displaydoc",
+ "hashbrown 0.14.5",
+ "itertools 0.12.1",
+ "jf-relation 0.4.4 (git+https://github.com/haopining/jellyfish)",
+ "jf-rescue 0.1.0 (git+https://github.com/haopining/jellyfish)",
+ "jf-utils 0.4.4 (git+https://github.com/haopining/jellyfish)",
  "num-bigint",
  "num-traits",
  "serde",
@@ -683,7 +727,7 @@ dependencies = [
  "derivative",
  "displaydoc",
  "itertools 0.12.1",
- "jf-utils",
+ "jf-utils 0.4.4 (git+https://github.com/EspressoSystems/jellyfish)",
  "merlin",
  "rayon",
 ]
@@ -705,11 +749,11 @@ dependencies = [
  "espresso-systems-common",
  "hashbrown 0.14.5",
  "itertools 0.12.1",
- "jf-crhf",
+ "jf-crhf 0.1.0 (git+https://github.com/EspressoSystems/jellyfish)",
  "jf-pcs",
- "jf-relation",
- "jf-rescue",
- "jf-utils",
+ "jf-relation 0.4.4 (git+https://github.com/EspressoSystems/jellyfish)",
+ "jf-rescue 0.1.0 (git+https://github.com/EspressoSystems/jellyfish)",
+ "jf-utils 0.4.4 (git+https://github.com/EspressoSystems/jellyfish)",
  "merlin",
  "num-bigint",
  "rand_chacha",
@@ -723,6 +767,15 @@ dependencies = [
 name = "jf-prf"
 version = "0.1.0"
 source = "git+https://github.com/EspressoSystems/jellyfish#1bce638edb8e881dc3c6fcb9d2d762004b4365cc"
+dependencies = [
+ "ark-serialize",
+ "ark-std",
+]
+
+[[package]]
+name = "jf-prf"
+version = "0.1.0"
+source = "git+https://github.com/haopining/jellyfish#06b073a425de402c0dbc5b28cde62bcf9c45abda"
 dependencies = [
  "ark-serialize",
  "ark-std",
@@ -748,7 +801,33 @@ dependencies = [
  "dyn-clone",
  "hashbrown 0.14.5",
  "itertools 0.12.1",
- "jf-utils",
+ "jf-utils 0.4.4 (git+https://github.com/EspressoSystems/jellyfish)",
+ "num-bigint",
+ "rand_chacha",
+ "rayon",
+]
+
+[[package]]
+name = "jf-relation"
+version = "0.4.4"
+source = "git+https://github.com/haopining/jellyfish#06b073a425de402c0dbc5b28cde62bcf9c45abda"
+dependencies = [
+ "ark-bls12-377",
+ "ark-bls12-381",
+ "ark-bn254",
+ "ark-bw6-761",
+ "ark-ec",
+ "ark-ff",
+ "ark-poly",
+ "ark-serialize",
+ "ark-std",
+ "derivative",
+ "displaydoc",
+ "downcast-rs",
+ "dyn-clone",
+ "hashbrown 0.14.5",
+ "itertools 0.12.1",
+ "jf-utils 0.4.4 (git+https://github.com/haopining/jellyfish)",
  "num-bigint",
  "rand_chacha",
  "rayon",
@@ -771,17 +850,62 @@ dependencies = [
  "ark-std",
  "displaydoc",
  "itertools 0.12.1",
- "jf-commitment",
- "jf-crhf",
- "jf-prf",
- "jf-relation",
- "jf-utils",
+ "jf-commitment 0.1.0 (git+https://github.com/EspressoSystems/jellyfish)",
+ "jf-crhf 0.1.0 (git+https://github.com/EspressoSystems/jellyfish)",
+ "jf-prf 0.1.0 (git+https://github.com/EspressoSystems/jellyfish)",
+ "jf-relation 0.4.4 (git+https://github.com/EspressoSystems/jellyfish)",
+ "jf-utils 0.4.4 (git+https://github.com/EspressoSystems/jellyfish)",
+]
+
+[[package]]
+name = "jf-rescue"
+version = "0.1.0"
+source = "git+https://github.com/haopining/jellyfish#06b073a425de402c0dbc5b28cde62bcf9c45abda"
+dependencies = [
+ "ark-bls12-377",
+ "ark-bls12-381",
+ "ark-bn254",
+ "ark-bw6-761",
+ "ark-crypto-primitives",
+ "ark-ed-on-bls12-377",
+ "ark-ed-on-bls12-381",
+ "ark-ed-on-bn254",
+ "ark-ff",
+ "ark-std",
+ "displaydoc",
+ "itertools 0.12.1",
+ "jf-commitment 0.1.0 (git+https://github.com/haopining/jellyfish)",
+ "jf-crhf 0.1.0 (git+https://github.com/haopining/jellyfish)",
+ "jf-prf 0.1.0 (git+https://github.com/haopining/jellyfish)",
+ "jf-relation 0.4.4 (git+https://github.com/haopining/jellyfish)",
+ "jf-utils 0.4.4 (git+https://github.com/haopining/jellyfish)",
 ]
 
 [[package]]
 name = "jf-utils"
 version = "0.4.4"
 source = "git+https://github.com/EspressoSystems/jellyfish#1bce638edb8e881dc3c6fcb9d2d762004b4365cc"
+dependencies = [
+ "ark-ec",
+ "ark-ed-on-bls12-377",
+ "ark-ed-on-bls12-381",
+ "ark-ff",
+ "ark-poly",
+ "ark-serialize",
+ "ark-std",
+ "digest",
+ "displaydoc",
+ "rand_chacha",
+ "rayon",
+ "serde",
+ "sha2",
+ "tagged-base64",
+]
+
+[[package]]
+name = "jf-utils"
+version = "0.4.4"
+source = "git+https://github.com/haopining/jellyfish#06b073a425de402c0dbc5b28cde62bcf9c45abda"
 dependencies = [
  "ark-ec",
  "ark-ed-on-bls12-377",
@@ -1464,9 +1588,12 @@ dependencies = [
 name = "zkcreds-benchmark"
 version = "0.1.0"
 dependencies = [
+ "ark-bls12-377",
  "ark-bls12-381",
+ "ark-bn254",
  "ark-crypto-primitives",
  "ark-ec",
+ "ark-ed-on-bls12-381",
  "ark-ff",
  "ark-poly",
  "ark-serialize",
@@ -1474,12 +1601,14 @@ dependencies = [
  "criterion",
  "displaydoc",
  "hashbrown 0.14.5",
- "jf-commitment",
- "jf-crhf",
- "jf-merkle-tree",
+ "jf-commitment 0.1.0 (git+https://github.com/EspressoSystems/jellyfish)",
+ "jf-crhf 0.1.0 (git+https://github.com/EspressoSystems/jellyfish)",
+ "jf-merkle-tree 0.1.0 (git+https://github.com/EspressoSystems/jellyfish)",
+ "jf-merkle-tree 0.1.0 (git+https://github.com/haopining/jellyfish)",
  "jf-plonk",
- "jf-relation",
- "jf-rescue",
+ "jf-relation 0.4.4 (git+https://github.com/EspressoSystems/jellyfish)",
+ "jf-rescue 0.1.0 (git+https://github.com/EspressoSystems/jellyfish)",
+ "jf-utils 0.4.4 (git+https://github.com/EspressoSystems/jellyfish)",
  "lazy_static",
  "num-bigint",
  "rand",
