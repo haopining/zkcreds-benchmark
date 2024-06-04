@@ -1,1 +1,0 @@
-for<'a> fn(usize, &'a mut _) -> Result<<PlonkKzgSnark<F> as UniversalSNARK<F>>::UniversalSRS, <PlonkKzgSnark<F> as UniversalSNARK<F>>::Error> {<PlonkKzgSnark<F> as UniversalSNARK<F>>::universal_setup::<_>}

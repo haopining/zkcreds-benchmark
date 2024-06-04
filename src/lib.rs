@@ -1,8 +1,6 @@
 pub mod attrs;
-pub mod proving_system;
-pub mod poseidon_utils;
-pub mod proof_data_structure;
-// pub mod forest_gadget;
+
+pub mod forest_gadget;
 pub mod simple_expiry;
 
 extern crate jf_commitment;
@@ -17,6 +15,7 @@ extern crate core;
 extern crate ark_ff;
 extern crate ark_std;
 extern crate ark_ec;
+extern crate ark_serialize;
 extern crate ark_bn254;
 extern crate rand_chacha;
 extern crate ark_bls12_381;
