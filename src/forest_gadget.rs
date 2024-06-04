@@ -1,5 +1,3 @@
-use std::collections::linked_list::Cursor;
-
 use ark_ff::PrimeField;
 use jf_merkle_tree::NodeValue;
 use jf_relation::{BoolVar, Circuit, CircuitError, PlonkCircuit, Variable};
@@ -24,13 +22,11 @@ where
     fn is_forest_member(
         &mut self,
         forest_proof_var: Self::ForestMembershipProofVar,
-        elem_root_var: Variable,
     ) -> Result<BoolVar, CircuitError>;
 
     fn enforce_forest_membership_proof(
         &mut self,
         forest_proof_var: Self::ForestMembershipProofVar,
-        elem_root_var: Variable,
     ) -> Result<(), CircuitError>;
     
 }
@@ -69,12 +65,11 @@ where
     fn is_forest_member(
         &mut self,
         forest_proof_var: Self::ForestMembershipProofVar,
-        elem_root_var: Variable,
     ) -> Result<BoolVar, CircuitError> {
         let mut result = self.create_boolean_variable(false);
         // Check whether elem_root_var is in forest_proof_var.roots_vars
         for cur_root in forest_proof_var.roots_vars.iter() {
-            result = self.is_equal(elem_root_var, *cur_root);
+            result = self.is_equal(forest_proof_var.root_var, *cur_root);
         };
         Ok(result.unwrap())
     }
@@ -83,10 +78,9 @@ where
     fn enforce_forest_membership_proof(
         &mut self,
         forest_proof_var: Self::ForestMembershipProofVar,
-        elem_root_var: Variable,
     ) -> Result<(), CircuitError> {
         // create table vairables which are the roots of the forest
-        let bool_val = MerkleForestGadget::<T>::is_forest_member(self, forest_proof_var, elem_root_var)?;
+        let bool_val = MerkleForestGadget::<T>::is_forest_member(self, forest_proof_var)?;
         self.enforce_true(bool_val.into())
     }
 
