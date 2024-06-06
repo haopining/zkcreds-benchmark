@@ -26,3 +26,4 @@ extern crate num_bigint;
 extern crate criterion;
 extern crate alloc;
 extern crate haopining_merkle_tree;
+extern crate itertools;
