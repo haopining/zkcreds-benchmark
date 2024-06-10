@@ -1,25 +1,88 @@
-use core::num;
+use std::clone;
+
 use criterion::Criterion;
+use jf_commitment::CommitmentScheme;
 use jf_merkle_tree::{
     gadgets::MerkleTreeGadget, 
     prelude::{MerkleCommitment, MerkleTreeScheme, RescueMerkleTree}
 };
-use jf_relation::{Arithmetization, Circuit, PlonkCircuit, Variable};
-use jf_rescue::RescueParameter;
+use ark_serialize::{CanonicalSerialize, CanonicalDeserialize};
+use jf_relation::{Arithmetization, Circuit, PlonkCircuit, Variable, CircuitError};
+use jf_rescue::{
+        RescueParameter, commitment::FixedLengthRescueCommitment,
+        gadgets::commitment::CommitmentGadget
+    };
 use jf_plonk::{
     errors::PlonkError,
     proof_system::{PlonkKzgSnark, UniversalSNARK},
     transcript::StandardTranscript,
 };
-use jf_utils::test_rng;
-// use ark_bls12_377::{Bls12_377, Fr};
+use jf_utils::{test_rng, to_bytes};
 use ark_bls12_381::{Bls12_381, Fr};
-use crate::forest_gadget::{ForestMembershipProofVar, MerkleForestGadget};
+use ark_std::{rand::Rng, borrow::Borrow};
+use ark_ff::UniformRand;
+use rand::{rngs::StdRng, SeedableRng, thread_rng};
+use crate::{
+com_nonce::ComNonce, forest_gadget::{ForestMembershipProofVar, MerkleForestGadget}
+};
+
+const EXPIRY_INPUT_LENGTH: usize = 1;
+const EXPIRY_INPUT_LENGTH_PLUS_ONE: usize = EXPIRY_INPUT_LENGTH + 1;
+type ComSchemeGadget = CommitmentGadget;
+type ComScheme = FixedLengthRescueCommitment<Fr, EXPIRY_INPUT_LENGTH, EXPIRY_INPUT_LENGTH_PLUS_ONE>;
+
+#[derive(Clone)]
+struct ExpiryAttrs {
+    nonce: StdRng,
+    expiry: Fr,
+}
+
+#[derive(Clone)]
+struct ExpiryAttrsInput {
+    nonce: [u8; 32],
+    expiry_input: [Fr; 1],
+    com: Fr,
+}
+
+
+
+#[derive(Clone, Default)]
+pub(crate) struct ExpiryChecker {
+    pub (crate) threshold_expiry: Fr,
+}
+
+impl ExpiryChecker {
+    fn pred(
+        &self,
+        expiry_attrs: ExpiryAttrsInput,
+    ) -> Result<PlonkCircuit<Fr>, CircuitError> {
+        let mut circuit = PlonkCircuit::<Fr>::new_turbo_plonk();
+        let nonce = expiry_attrs.nonce;
+        let mut nonce_seed = StdRng::from_seed(nonce);
+        let rng = Fr::rand(&mut nonce_seed);
+        let expiry_input = expiry_attrs.expiry_input;
+        let com = expiry_attrs.com;
+        FixedLengthRescueCommitment::<Fr, 1, 2>::verify(expiry_input, Some(&rng), &com).unwrap();
+
+        let expiry_input_var = expiry_input.iter().map(|x| circuit.create_variable(*x)).collect::<Result<Vec<_>, _>>()?;
+        let com_var = circuit.create_variable(com).unwrap();
+        let expiry_com_var = ComSchemeGadget::commit(&mut circuit, &expiry_input_var, com_var).unwrap();
+        let threshold_expiry_var = circuit.create_variable(self.threshold_expiry).unwrap();
+        circuit.enforce_geq(expiry_com_var, threshold_expiry_var).unwrap();
+        assert!(circuit.check_circuit_satisfiability(&[]).is_ok());
+
+        Ok(circuit)
+    }
+    
+}
+
+
+
 
 // #[test]
 // pub fn tree() {
 
-pub fn tree(c: &mut Criterion) {
+pub fn bench_expiry(c: &mut Criterion) {
     let mut circuit = PlonkCircuit::<Fr>::new_turbo_plonk();
     // Create a 3-ary MT, instantiated with a Rescue-based hash, of height 1.
     let elements = vec![Fr::from(1_u64), Fr::from(2_u64), Fr::from(100_u64)];
@@ -68,12 +131,15 @@ pub fn tree(c: &mut Criterion) {
         forest_roots.push(random_root);
     }
 
-    let forest_proof_var = MerkleForestGadget::<RescueMerkleTree<Fr>>::is_forest_member_proof(
+    // verify that the expected root is a member of the forest
+    let _forest_proof_var = MerkleForestGadget::<RescueMerkleTree<Fr>>::is_forest_member_proof(
         &mut forest_circuit,
         forest_roots,
         expected_root
     ).unwrap();
 
+    //TODO: Here the proof is not constraint to the above result
+    //Need to fix it !!!
     MerkleForestGadget::<RescueMerkleTree<Fr>>::enforce_forest_membership_proof(
         &mut forest_circuit,
     ).unwrap();
@@ -165,6 +231,61 @@ pub fn tree(c: &mut Criterion) {
         &forest_vk,
         &public_inputs,
         &forest_proof,
+        None,
+    ).is_ok());
+
+    // Commitment for expiry
+    let nonce = thread_rng().gen::<[u8; 32]>();
+    let mut nonce_seed = StdRng::from_seed(nonce);
+    let expiry_rng = Fr::rand(&mut nonce_seed);
+
+    let expiry = Fr::from(220);
+    let expiry_input = [expiry];
+
+    let com = FixedLengthRescueCommitment::<Fr, 1, 2>::commit(&expiry_input, Some(&expiry_rng)).unwrap();
+
+    // Expiry
+    let expiry_attrs = ExpiryAttrsInput{nonce, expiry_input, com};
+    FixedLengthRescueCommitment::<Fr, 1, 2>::verify(expiry_input, Some(&expiry_rng), &com).unwrap();
+
+    //
+    let expiry_checker = ExpiryChecker{threshold_expiry: Fr::from(100)};
+    let mut expiry_circuit = expiry_checker.pred(expiry_attrs).unwrap();
+    expiry_circuit.finalize_for_arithmetization().unwrap();
+
+    let (expiry_pk ,expiry_vk) = PlonkKzgSnark::<Bls12_381>::preprocess(&srs, &expiry_circuit).unwrap();
+    c.bench_function("Expiry show: proving expiry", |b| {
+        b.iter(|| {
+            PlonkKzgSnark::<Bls12_381>::prove::<_, _, StandardTranscript>(
+                rng,
+                &expiry_circuit,
+                &expiry_pk,
+                None,
+            ).unwrap();
+        })
+    });
+    let expiry_proof = PlonkKzgSnark::<Bls12_381>::prove::<_, _, StandardTranscript>(
+        rng,
+        &expiry_circuit,
+        &expiry_pk,
+        None,
+    ).unwrap();
+    let expiry_public_inputs = expiry_circuit.public_input().unwrap();
+
+    c.bench_function("Expiry show: Verifying expiry", |b| {
+        b.iter(|| {
+            PlonkKzgSnark::<Bls12_381>::verify::<StandardTranscript>(
+                &expiry_vk,
+                &expiry_public_inputs,
+                &expiry_proof,
+                None,
+            )
+        })
+    });
+    assert!(PlonkKzgSnark::<Bls12_381>::verify::<StandardTranscript>(
+        &expiry_vk,
+        &expiry_public_inputs,
+        &expiry_proof,
         None,
     ).is_ok());
 

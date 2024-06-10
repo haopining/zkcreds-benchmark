@@ -31,7 +31,7 @@ jf-merkle-tree = {git = "https://github.com/EspressoSystems/jellyfish", package 
 jf-crhf = {git = "https://github.com/EspressoSystems/jellyfish", package = "jf-crhf"}
 jf-relation = {git = "https://github.com/EspressoSystems/jellyfish", package = "jf-relation"}
 jf-plonk = {git = "https://github.com/EspressoSystems/jellyfish", package = "jf-plonk", features = ["test-srs"]}
-jf-rescue = {git = "https://github.com/EspressoSystems/jellyfish", package = "jf-rescue"}
+jf-rescue = {git = "https://github.com/EspressoSystems/jellyfish", package = "jf-rescue", features = ["gadgets"]}
 jf-utils = {git = "https://github.com/EspressoSystems/jellyfish", package = "jf-utils"}
 
 haopining-merkle-tree = {git = "https://github.com/haopining/jellyfish", package = "jf-merkle-tree", features = ["gadgets"]}

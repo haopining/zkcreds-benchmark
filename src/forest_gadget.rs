@@ -1,13 +1,9 @@
-use std::result;
 
 use ark_ff::PrimeField;
-use jf_merkle_tree::NodeValue;
-use jf_plonk::circuit;
-use jf_relation::{BoolVar, Circuit, CircuitError, PlonkCircuit, Variable};
-use jf_merkle_tree::gadgets::{DigestAlgorithmGadget, MerkleTreeGadget, MembershipProof, RescueDigestGadget, Merkle3AryMembershipProofVar};
-use jf_merkle_tree::{MerkleTreeScheme, UniversalMerkleTreeScheme, prelude::RescueMerkleTree, ToTraversalPath};
-use jf_rescue::{RescueParameter, gadgets::RescueGadget};
-use itertools::Itertools;
+use jf_relation::{Circuit, CircuitError, PlonkCircuit, Variable};
+use jf_merkle_tree::gadgets:: MembershipProof;
+use jf_merkle_tree::{MerkleTreeScheme, prelude::RescueMerkleTree, ToTraversalPath};
+use jf_rescue::RescueParameter;
 
 type NodeVal<F> = <RescueMerkleTree<F> as MerkleTreeScheme>::NodeValue;
 
@@ -123,7 +119,7 @@ mod test {
             forest_roots.push(random_root);
         }
 
-        let forest_proof_var = MerkleForestGadget::<RescueMerkleTree<Fr>>::is_forest_member_proof(
+        let _forest_proof_var = MerkleForestGadget::<RescueMerkleTree<Fr>>::is_forest_member_proof(
             &mut circuit,
             forest_roots,
             member_root
@@ -137,32 +133,4 @@ mod test {
         println!("Forest satisfiable")
 
     }
-
-    // fn test_create_forest_membership_proof_variable () {
-    //     let mut circuit = PlonkCircuit::<Fr>::new_turbo_plonk();
-    //     let elements = vec![Fr::from(1_u64), Fr::from(2_u64), Fr::from(100_u64)];
-    //     let mt = RescueMerkleTree::<Fr>::from_elems(Some(24), elements).unwrap();
-    //     let expected_root = mt.commitment().digest();
-        
-    //     // Gen forest
-    //     // let num_trees = 256;
-    //     let num_trees = 10;
-
-    //     let mut forest_roots = Vec::with_capacity(num_trees);
-    //     forest_roots.push(expected_root.clone());
-
-    //     for _ in 1..num_trees {
-    //         let elements = vec![Fr::from(2_u64), Fr::from(4_u64), Fr::from(100_u64)];
-    //         let mt = RescueMerkleTree::<Fr>::from_elems(Some(24), elements).unwrap();
-    //         let random_root = mt.commitment().digest();
-    //         forest_roots.push(random_root);
-    //     }
-
-    //     let forest_proof_var = MerkleForestGadget::<RescueMerkleTree<Fr>>::create_forest_membership_proof_variable(
-    //         &mut circuit,
-    //         forest_roots,
-    //         expected_root
-    //     ).unwrap();
-
-    // }
 }
