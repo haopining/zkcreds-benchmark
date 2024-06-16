@@ -1,5 +1,4 @@
 use std::clone;
-
 use criterion::Criterion;
 use jf_commitment::CommitmentScheme;
 use jf_merkle_tree::{
@@ -75,7 +74,6 @@ impl ExpiryChecker {
     }
     
 }
-
 
 
 
@@ -177,6 +175,7 @@ pub fn bench_expiry(c: &mut Criterion) {
         &tree_pk,
         None,
     ).unwrap();
+    crate::util::record_size("Tree Proof", &proof);
     let public_inputs = circuit.public_input().unwrap();
 
     c.bench_function("Expiry show: Verifying tree", |b| {
@@ -215,6 +214,8 @@ pub fn bench_expiry(c: &mut Criterion) {
         &forest_pk,
         None,
     ).unwrap();
+    crate::util::record_size("Forest Proof", &forest_proof);
+
     let public_inputs = forest_circuit.public_input().unwrap();
 
     c.bench_function("Expiry show: Verifying forest", |b| {
@@ -239,7 +240,7 @@ pub fn bench_expiry(c: &mut Criterion) {
     let mut nonce_seed = StdRng::from_seed(nonce);
     let expiry_rng = Fr::rand(&mut nonce_seed);
 
-    let expiry = Fr::from(220);
+    let expiry = Fr::from(10);
     let expiry_input = [expiry];
 
     let com = FixedLengthRescueCommitment::<Fr, 1, 2>::commit(&expiry_input, Some(&expiry_rng)).unwrap();
@@ -270,6 +271,7 @@ pub fn bench_expiry(c: &mut Criterion) {
         &expiry_pk,
         None,
     ).unwrap();
+    crate::util::record_size("Expiry Proof", &expiry_proof);
     let expiry_public_inputs = expiry_circuit.public_input().unwrap();
 
     c.bench_function("Expiry show: Verifying expiry", |b| {

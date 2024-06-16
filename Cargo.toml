@@ -41,5 +41,6 @@ haopining-merkle-tree = {git = "https://github.com/haopining/jellyfish", package
 [[bench]]
 name = "bench"
 path = "bench/bench.rs"
+include = ["bench/util.rs"]
 harness = false
 

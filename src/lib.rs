@@ -4,6 +4,10 @@ pub mod forest_gadget;
 // pub mod pred;
 pub mod simple_expiry;
 
+#[path = "../bench/util.rs"]
+pub mod util;
+
+
 extern crate jf_commitment;
 extern crate jf_merkle_tree;
 extern crate jf_plonk;
@@ -28,3 +32,5 @@ extern crate criterion;
 extern crate alloc;
 extern crate haopining_merkle_tree;
 extern crate itertools;
+
+// use crate::bench::util::record_size;
